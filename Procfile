@@ -1,1 +1,1 @@
-web: gunicorn NutriWise.wsgi
+web: gunicorn SmartFoodDiary.wsgi
