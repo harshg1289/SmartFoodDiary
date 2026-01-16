@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'users/register.css' %}">
+    <style>
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+        }
+
+        .valid-message {
+            color: green;
+            font-size: 0.9em;
+        }
+
+        .invalid {
+            border: 2px solid red;
+        }
+
+        .valid {
+            border: 2px solid green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Create an Account</div>
+        <form method="POST" action="{% url 'users:register' %}" id="registration-form" novalidate>
+            {% csrf_token %}
+            <div class="user-details">
+                <div class="input-box">
+                    <label for="full_name" class="details">Full Name*</label>
+                    <input type="text" name="full_name" id="full_name" placeholder="Enter your full name">
+                    <div class="error-message" id="full-name-error" aria-live="polite"></div>
+                </div>
+                <div class="input-box">
+                    <label for="username" class="details">Username*</label>
+                    <input type="text" name="username" id="username" placeholder="Enter your username">
+                    <div class="error-message" id="username-error" aria-live="polite"></div>
+                </div>
+                <div class="input-box">
+                    <label for="email" class="details">Email*</label>
+                    <input type="email" name="email" id="email" placeholder="Enter your email">
+                    <div class="error-message" id="email-error" aria-live="polite"></div>
+                </div>
+                <div class="input-box">
+                    <label for="phone_number" class="details">Phone Number*</label>
+                    <input type="text" name="phone_number" id="phone_number" placeholder="Enter your phone number">
+                    <div class="error-message" id="phone-number-error" aria-live="polite"></div>
+                </div>
+                <div class="input-box">
+                    <label for="password1" class="details">Password*</label>
+                    <input type="password" name="password1" id="password1" placeholder="Enter your password">
+                    <div class="error-message" id="password1-error" aria-live="polite"></div>
+                </div>
+                <div class="input-box">
+                    <label for="password2" class="details">Confirm Password*</label>
+                    <input type="password" name="password2" id="password2" placeholder="Confirm your password">
+                    <div class="error-message" id="password2-error" aria-live="polite"></div>
+                </div>
+            </div>
+            <div class="button">
+                <input type="submit" value="Register">
+            </div>
+        </form>
+        <p>Already have an account? <a href="{% url 'users:login' %}">Login here</a></p>
+    </div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('registration-form');
+            const fields = [
+                {
+                    id: 'full_name',
+                    errorId: 'full-name-error',
+                    validation: value => value.trim() !== '',
+                    invalidMessage: 'Please fill out your Full Name'
+                },
+                {
+                    id: 'username',
+                    errorId: 'username-error',
+                    validation: value => /^(?=.*[@_/])[a-zA-Z0-9@_/]{8,}$/.test(value),
+                    invalidMessage: 'Username must be at least 8 characters and include @, /, or _'
+                },
+                {
+                    id: 'email',
+                    errorId: 'email-error',
+                    validation: value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+                    invalidMessage: 'Please provide a valid email address'
+                },
+                {
+                    id: 'phone_number',
+                    errorId: 'phone-number-error',
+                    validation: value => /^\d{10}$/.test(value),
+                    invalidMessage: 'Phone number must contain exactly 10 digits'
+                },
+                {
+                    id: 'password1',
+                    errorId: 'password1-error',
+                    validation: value => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(value),
+                    invalidMessage: 'Password must contain at least 8 characters, including uppercase, lowercase, number, and special character'
+                },
+                {
+                    id: 'password2',
+                    errorId: 'password2-error',
+                    validation: value => value === document.getElementById('password1').value,
+                    invalidMessage: 'Passwords must match'
+                }
+            ];
+
+            fields.forEach(({ id, errorId, validation, invalidMessage }) => {
+                const input = document.getElementById(id);
+                const errorElement = document.getElementById(errorId);
+
+                input.addEventListener('input', () => {
+                    const value = input.value.trim();
+                    if (validation(value)) {
+                        input.classList.remove('invalid');
+                        input.classList.add('valid');
+                        errorElement.textContent = '';
+                    } else {
+                        input.classList.add('invalid');
+                        input.classList.remove('valid');
+                        errorElement.textContent = invalidMessage;
+                    }
+                });
+            });
+
+            form.addEventListener('submit', (e) => {
+                let formValid = true;
+
+                fields.forEach(({ id, errorId, validation, invalidMessage }) => {
+                    const input = document.getElementById(id);
+                    const errorElement = document.getElementById(errorId);
+                    const value = input.value.trim();
+
+                    if (!validation(value)) {
+                        formValid = false;
+                        input.classList.add('invalid');
+                        errorElement.textContent = invalidMessage;
+                    } else {
+                        input.classList.remove('invalid');
+                        errorElement.textContent = '';
+                    }
+                });
+
+                if (!formValid) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
